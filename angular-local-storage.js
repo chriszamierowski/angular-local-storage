@@ -83,7 +83,7 @@ angularLocalStorage.provider('localStorageService', function() {
     }
     var deriveQualifiedKey = function(key) {
       return prefix + key;
-    }
+    };
     // Checks the browser to see if local storage is supported
     var browserSupportsLocalStorage = (function () {
       try {
@@ -137,7 +137,7 @@ angularLocalStorage.provider('localStorageService', function() {
         if (angular.isObject(value) || angular.isArray(value)) {
           value = angular.toJson(value);
         }
-        if (webStorage) {webStorage.setItem(deriveQualifiedKey(key), value)};
+        if (webStorage) {webStorage.setItem(deriveQualifiedKey(key), value);}
         if (notify.setItem) {
           $rootScope.$broadcast('LocalStorageModule.notification.setitem', {key: key, newvalue: value, storageType: self.storageType});
         }
@@ -316,20 +316,28 @@ angularLocalStorage.provider('localStorageService', function() {
 
     // Directly get a value from a cookie
     // Example use: localStorageService.cookie.get('library'); // returns 'angular'
-    var getFromCookies = function (key) {
+    var getFromCookies = function (key, noPrefix) {
       if (!browserSupportsCookies()) {
         $rootScope.$broadcast('LocalStorageModule.notification.error', 'COOKIES_NOT_SUPPORTED');
         return false;
       }
 
       var cookies = $document.cookie && $document.cookie.split(';') || [];
+
       for(var i=0; i < cookies.length; i++) {
         var thisCookie = cookies[i];
         while (thisCookie.charAt(0) === ' ') {
           thisCookie = thisCookie.substring(1,thisCookie.length);
         }
-        if (thisCookie.indexOf(deriveQualifiedKey(key) + '=') === 0) {
-          return decodeURIComponent(thisCookie.substring(prefix.length + key.length + 1, thisCookie.length));
+
+        if(noPrefix) {
+          if (thisCookie.indexOf(key + '=') === 0) {
+            return decodeURIComponent(thisCookie.substring(key.length + 1, thisCookie.length));
+          }
+        } else {
+          if (thisCookie.indexOf(deriveQualifiedKey(key) + '=') === 0) {
+            return decodeURIComponent(thisCookie.substring(prefix.length + key.length + 1, thisCookie.length));
+          }
         }
       }
       return null;

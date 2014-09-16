@@ -25,65 +25,65 @@ describe('localStorageService', function() {
     return function($window, localStorageService) {
       elmSpy = spyOn($window.localStorage, 'getItem').andCallThrough();
       localStorageService.get(key);
-    }
+    };
   }
 
   function addItem(key, value) {
     return function($window, localStorageService) {
       elmSpy = spyOn($window.localStorage, 'setItem').andCallThrough();
       localStorageService.set(key, value);
-    }
+    };
   }
 
   function removeItem(key) {
     return function($window, localStorageService) {
       elmSpy = spyOn($window.localStorage, 'removeItem').andCallThrough();
       localStorageService.remove(key);
-    }
+    };
   }
 
   //Expectations
   function expectGetting(key) {
     return function() {
       expect(elmSpy).toHaveBeenCalledWith(key);
-    }
+    };
   }
 
   function expectAdding(key, value) {
     return function() {
       expect(elmSpy).toHaveBeenCalledWith(key, value);
-    }
+    };
   }
 
   function expectRemoving(key) {
     return function() {
       expect(elmSpy).toHaveBeenCalledWith(key);
-    }
+    };
   }
 
   function expectMatching(key, expected) {
     return function(localStorageService) {
       expect(localStorageService.get(key)).toEqual(expected);
-    }
+    };
   }
 
   function expectStorageTyping(type) {
     return function(localStorageService) {
       expect(localStorageService.getStorageType()).toEqual(type);
-    }
+    };
   }
 
   function expectSupporting(expected) {
     return function(localStorageService) {
       expect(localStorageService.isSupported).toEqual(expected);
-    }
+    };
   }
 
   function expectDomain(domain) {
     return function($document, localStorageService) {
       localStorageService.set('foo','bar'); //Should trigger first time
       expect($document.cookie.indexOf('domain=' + domain)).not.toEqual(-1);
-    }
+    };
   }
 
   function expectCookieConfig(exp, path) {
@@ -91,7 +91,7 @@ describe('localStorageService', function() {
       localStorageService.set('foo','bar'); //Should trigger first time
       expect($document.cookie.indexOf('expires=' + exp)).not.toEqual(-1);
       expect($document.cookie.indexOf('path=' + path)).not.toEqual(-1);
-    }
+    };
   }
 
   //Provider
@@ -110,19 +110,19 @@ describe('localStorageService', function() {
   function setStorage(type) {
     return function(localStorageServiceProvider) {
       localStorageServiceProvider.setStorageType(type);
-    }
+    };
   }
 
   function setCookieDomain(domain) {
     return function(localStorageServiceProvider) {
       localStorageServiceProvider.setStorageCookieDomain(domain);
-    }
+    };
   }
 
   function setStorageCookie(exp, path) {
     return function(localStorageServiceProvider) {
       localStorageServiceProvider.setStorageCookie(exp, path);
-    }
+    };
   }
 
   beforeEach(module('LocalStorageModule', function($provide) {
@@ -251,7 +251,7 @@ describe('localStorageService', function() {
       inject(function($window, localStorageService) {
         var setSpy = spyOn($window.sessionStorage, 'setItem'),
           getSpy = spyOn($window.sessionStorage, 'getItem'),
-          removeSpy = spyOn($window.sessionStorage, 'removeItem')
+          removeSpy = spyOn($window.sessionStorage, 'removeItem');
 
         localStorageService.set('foo', 'bar');
         localStorageService.get('foo');
@@ -276,14 +276,14 @@ describe('localStorageService', function() {
       inject(
         expectSupporting(true)
       );
-    })
+    });
 
   });
 
   //cookie
   describe('Cookie', function() {
 
-    beforeEach(module('LocalStorageModule', function($provide, localStorageServiceProvider) {
+    beforeEach(module('LocalStorageModule', function($provide) {
       $provide.value('$window', {
         localStorage: false,
         sessionStorage: false
@@ -314,6 +314,12 @@ describe('localStorageService', function() {
     it('should be able to set and get cookie', inject(function(localStorageService) {
       localStorageService.set('cookieKey', 'cookieValue');
       expect(localStorageService.get('cookieKey')).toEqual('cookieValue');
+    }));
+
+    it('should be able to get cookie without a prefix', inject(function($document, localStorageService) {
+      //shouldn't set cookies without a prefix - assume this was an existing cookie
+      $document.cookie = 'nonPrefixedCookieKey=nonPrefixedCookieValue';
+      expect(localStorageService.cookie.get('nonPrefixedCookieKey', true)).toEqual('nonPrefixedCookieValue');
     }));
 
     it('should be able to remove from cookie', inject(function(localStorageService) {
